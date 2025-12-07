@@ -28,10 +28,10 @@ public class Main {
     }
 }
 ```
-- 위 예제를 바이트 코드로 바꿀 경우의 예제
+- 위 예제를 바이트 코드로 바꿀 경우
 ```plaintext
 0: aload_1        ; p 레퍼런스를 로드
-1: invokevirtual #2 // Child 또는 Parent hello() 호출
+1: invokevirtual #2 // Child hello() 호출
 4: return
 ```
 - invokevirtual 명령어가 핵심이다
@@ -44,7 +44,7 @@ public class Main {
 ![images1](images/method1.png)
 
 - 가상 함수(virtual function 또는 virtual method)는 상속하는 클래스 내에서 같은 시그니처(메서드명, 매개변수, 리턴형)의 함수로 오버라이딩 될 수 있는 함수 또는 메소드를 말한다
-- static이 아닌 메서드는 객체가 생성될 때 메서드 영역에 생성된다 
+- 모든 메서드는 클래스 단위로 메서드 영역에 생성된다 
   - 가상 함수는 가상함수 테이블(virtual function table) 이라는 구조로 함수의 주소를 저장하고 있다
 - 객체가 생성 되는 시점은 Runtime 시점으로 인스턴스의 타입을 결정지을 수 있다
   - 이때 재정의 된 메서드가 있을 경우, JVM이 가상 함수 테이블에서 메서드 주소를 이용하여 상위 클래스의 메서드가 아닌 인스턴스의 타입인 하위 클래스의 메서스(재정의 된 메서드)를 가져온다

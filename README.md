@@ -334,6 +334,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [서브쿼리](CS/Database/SubQuery.md)
 - [윈도우 함수](CS/Database/WindowFunction.md)
 - [계층형 질의](CS/Database/HierarchicalQuery.md)
+- [날짜 조회 쿼리](CS/Database/DateQuery.md)
 
 > [원리와응용 2025] Lecture 9,10. Database Design - Joonseok Lee
 

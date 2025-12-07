@@ -1,19 +1,21 @@
 # PECS (Producer Extends, Consumer Super)
 
-> java의 super, extends에 관한 공식이다(from effective java item28)
+> java의 super, extends에 관한 공식이다(from effective java item31)
 
 - 생산자(Producer)는 extends를 사용하고, 소비자(Consumer)는 super를 사용한다
   - 이것이 PECS(Producer-Extends, Consumer-Super)이다
 - Producer
   - 읽기(Read / Produce)를 위해 컬렉션에서 꺼낸 객체는 최소한 T 타입의 객체(혹은 그 상위 타입)임이 보장된다
   - 따라서 안전하게 T 타입으로 참조할 수 있다
+  - 데이터를 외부에 제공(생산, readonly이기에 데이터를 제공)
 - Consumer
   - 컴파일러가 컬렉션의 실제 타입을 알 수 없기 때문에, 어떤 하위 타입의 객체를 넣어도 타입 불일치로 인한 런타임 오류가 발생할 위험이 있다
+  - 자신이 다룰 수 있는 데이터의 범위를 넓혀 외부에서 들어오는 데이터를 안전하게 받아 저장(소비)
 
 ## 예제
 
 ```java
-package org.example.item28;
+package org.example.item31;
 
 // PECS
 public class Main {

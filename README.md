@@ -170,6 +170,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [Deadlock](CS/Joonion/Deadlock.md)
 - [Main Memory](CS/Joonion/MainMemory.md)
 - [Virtual Memory](CS/Joonion/VirtualMemory.md)
+- [Storage Management](CS/Joonion/StorageManagement.md)
 
 ---
 

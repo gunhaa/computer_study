@@ -51,3 +51,13 @@
   - DMA만이 CPU 개입 없이 블록 단위로 대량의 데이터를 한 번에 전송할 수 있다
   - DMA의 가장 큰 특징은 데이터 전송 과정에서 CPU가 반복적으로 관여할 필요가 없다는 것이다
   - 이는 Programmed I/O (PIO) 방식이 '한 바이트씩(one byte at a time)' CPU의 LOAD/STORE 명령을 통해 데이터를 옮기는 비효율성을 해소한다
+- I/O에 CPU가 개입하는 것(PIO)은 예전 방식이다
+  - DMA가 최신 방식이다
+  - 현대 IOCP/epoll의 async system call은 DMA를 이용해서 I/O를 효율적으로 처리한다
+    - IOCP(Input Output Completion Port)는 DMA를 통해 I/O가 완료된 후 그 결과를 스레드에게 효율적으로 전달하여 처리하게 할지 관리하는 OS의 port 역할을 한다
+    - IOCP의 Port는 DMA 장치로부터 직접 통지를 받는 물리적인 포트를 의미하는 것이 아니라, OS 내부에 존재하는 논리적인 구조를 의미한다
+    - DMA 등을 통해 커널 수준에서 비동기 I/O 작업이 실제로 완료되면, 커널은 이 완료된 작업의 정보(완료 패킷)를 이 큐(Port)에 넣어준다
+    - 애플리케이션의 워커 스레드들은 GetQueuedCompletionStatus() 함수를 호출하여 이 큐(Port)에 도착한 완료 패킷을 가져간다
+    - 큐(Port)에 들어있는 것은 작업이 완료되었다는 `통지 정보`이며, async I/O 요청 시 애플리케이션은 OS에게 Buffer의 메모리 주소를 넘겨준다(Buffer와 hardware가 DMA를 수행하는 것이 DMA의 핵심이다)
+    - 이 Buffer는 보통 애플리케이션이 미리 확보해 둔 메인 메모리(RAM)의 특정 위치이며, 완료시 신호를 받고 Buffer의 데이터를 애플리케이션이 수거해 사용한다
+    - 즉, `Buffer와 hardware가 DMA를 수행하는 것이 DMA의 핵심이며, async system call의 핵심이다`

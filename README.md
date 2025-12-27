@@ -417,6 +417,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 #### 친절한 SQL 튜닝
 
 - [1. SQL 처리 과정과 I/O](CS/SQLP/FriendlyTuning/SQLParsingAndIO.md)
+  - [I/O 튜닝 심화](CS/SQLP/FriendlyTuning/IOTuning.md)
 - [2. 인덱스 기본](CS/SQLP/FriendlyTuning/Index.md)
 - [3. 인덱스 튜닝](CS/SQLP/FriendlyTuning/IndexTuning.md)
 - [4. 조인 튜닝](CS/SQLP/FriendlyTuning/JoinTuning.md)

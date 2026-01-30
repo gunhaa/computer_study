@@ -4,6 +4,10 @@
   - 코드 표현은 파서가 만들기 간단하고 인터프리터가 소비하기 쉬워야한다
   - 1+2*3-4
     - 해당 식은 트리구조로 만들어져, 후위 순회로 처리된다(우선 순위에 대한 설정 필요, 산술의 규칙은 PEMDA)
+  - Token은 type, lexeme, literal, line의 상태가 있다
+    - line은 에러를 위한 줄 수
+    - lexeme는 예약어(text)라고 생각하면 된다
+    - literal value라고 생각하면 된다
 
 ## Lox Expression Grammar
 

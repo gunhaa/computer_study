@@ -4,6 +4,8 @@
 - 재귀 하향 파싱 예제 코드
   - while문을 이용해 greedy하게 좌항 결합을 시도한다
   - equal(동등)이 comparison(비교) 보다 우선순위가 높음을 표현한 코드이다
+  - 좌결합성 우선순위(동일한 우선순위를 가졌다면 좌측부터 처리)가 적용된 AST트리를 만들어낸다
+  - Parser의 책임은 Abstract Syntax Tree(AST)생성이 끝이다
 
 ```java
 private Expr equality() {

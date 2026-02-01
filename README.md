@@ -472,6 +472,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [코드 표현](CS/Interpreter/CodeExpression.md)
   - [AstPrinter 코드 분석](CS/Interpreter/AstPrinter.md)
 - [재귀 하향 파싱, recursive descent](CS/Interpreter/RecursiveDescent.md)
+- [Lox Interpreter 객체의 역할](CS/Interpreter/Role.md)
 
 ---
 

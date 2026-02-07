@@ -143,6 +143,7 @@ public class AstPrinter implements Expr.Visitor<String>{
 
 - 오버로딩은 명확하지 않아 피한다
   - 하지만 일반적인 Visitor 패턴은 static dispatch를 이용해 구현한다
+  - 오버 라이딩을하면 dyn dispatch를 사용해, 런타임에 타입을 결정해서 가져올 수 있다(java)
 - this를 넘겨 실행시킬 메서드의 힌트를 준다
 - 가지고있는 데이터 내부 클래스를 사용해 구현된 로직을 실행시켜 OCP와 SRP를 완벽하게 만족시킨다
 - recursive call로 print를 한다

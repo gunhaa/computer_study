@@ -22,3 +22,5 @@
   - Token의 모든 타입을 Enum으로 표현한다
 - AstPrinter
   - Expr의 행동(Visit interface)를 구현해서 expression 디버깅용 Print를 담당한다
+- Interpreter
+  - Expr의 행동(Visit interface)를 구현해서 parser가 만든 expression ast를 해석(interpret)한다

@@ -468,6 +468,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 > [Crafting Interpreters](https://product.kyobobook.co.kr/detail/S000003074575)
 
 - [인터프리터와 컴파일러 개요](CS/Interpreter/Index.md)
+- [용어 정리(Statement,Expression,Lexeme,Token,Literal)](CS/Interpreter/ExpressionStatement.md)
 - [Clox](CS/Interpreter/Clox.md)
 - [코드 표현](CS/Interpreter/CodeExpression.md)
   - [AstPrinter 코드 분석](CS/Interpreter/AstPrinter.md)

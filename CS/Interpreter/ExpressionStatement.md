@@ -28,8 +28,10 @@
   - 표현식
   - 값이 존재하는 토큰의 묶음이다(Literal- 값/ Grouping- 값의 묶음/ Binary- 두 개의 값/ Unary - 하나의 값)
   - 평가되어 하나의 값이 된다
+  - 값을 만들어내는 표현식은 모두 r-value이다
 - Statement
   - 프로그래밍 언어를 이루는 문장
   - Expression이 모여서 문장이 된다(var a = 1;/ print 213; 같은 형태)
   - 실행할 수 있는 최소의 단위이다
   - 모든 Expression은 Statement의 일부가 될 수 있지만(Expression Statement), 모든 Statement가 Expression인 것은 아니다
+  - Expr은 평가되어 하나의 값을 생성하는 토큰의 묶음이며, Statement는 그 값을 이용해 시스템에 변화를 주거나 프로그램의 흐름을 제어하는 실행 단위이다

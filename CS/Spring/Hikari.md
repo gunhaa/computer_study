@@ -113,6 +113,14 @@ public class ConcurrentBag<T extends IConcurrentBagEntry> implements AutoCloseab
   - 이유: 현대의 JDBC Driver(PostgreSQL, MySQL 등)가 이미 드라이버 레벨에서 더 효율적인 캐싱을 제공하기 때문
   - JAVA 계층에서의 중복 캐싱을 제거해 메모리 점유율을 낮추고 코드 복잡도를 줄였다
 
+### invokeVirtual 인라인화를 이용한 최적화
+
+- invokeVirutal은 vtable을 탐색해야 하므로 추가 비용이 든다
+  - 구현체를 런타임에 특정해 invokeStatic으로 호출할 수 있다면 JIT이 인라인화를 시도해 최적화 할 수 있다
+  - 구현체가 많으면(3개 이상) JIT은 최적화를 포기하는 경우가 많다
+  - 이를 극복하기 위해 런타임 바이트 코드 생성 라이브러리인 Javassist를 활용해 byte code를 삽입해 인스턴스(필드) 거치지 않고 정적 메서드가 정의된 final 클래스를 직접 지칭하여 invokestatic 호출을 유도한다
+  - 즉, 여러 구현체가 있는 팩토리 메서드(MySQL, Oracle의 delegate) 대신 final 클래스의 static메서드를 이용한 직접 호출로 최적화 한 것이다(한개의 구현체) 
+
 ### 권장 설정
 
 > https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration

@@ -115,11 +115,25 @@ public class ConcurrentBag<T extends IConcurrentBagEntry> implements AutoCloseab
 
 ### invokeVirtual 인라인화를 이용한 최적화
 
+```java
+// 수정 전
+public final PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException
+{
+    return PROXY_FACTORY.getProxyPreparedStatement(this, delegate.prepareStatement(sql, columnNames));
+}
+// 수정 후
+public final PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException
+{
+   return ProxyFactory.getProxyPreparedStatement(this, delegate.prepareStatement(sql, columnNames));
+}
+```
+
 - invokeVirutal은 vtable을 탐색해야 하므로 추가 비용이 든다
   - 구현체를 런타임에 특정해 invokeStatic으로 호출할 수 있다면 JIT이 인라인화를 시도해 최적화 할 수 있다
   - 구현체가 많으면(3개 이상) JIT은 최적화를 포기하는 경우가 많다
   - 이를 극복하기 위해 런타임 바이트 코드 생성 라이브러리인 Javassist를 활용해 byte code를 삽입해 인스턴스(필드) 거치지 않고 정적 메서드가 정의된 final 클래스를 직접 지칭하여 invokestatic 호출을 유도한다
   - 즉, 여러 구현체가 있는 팩토리 메서드(MySQL, Oracle의 delegate) 대신 final 클래스의 static메서드를 이용한 직접 호출로 최적화 한 것이다(한개의 구현체) 
+  - 즉, 동적 프록시 클래스(팩토리)의 내부 메서드는 벤더의 메서드를 바이트코드로 채워넣는다(버전이 바뀌며 구현이 바뀌어도 코드 변경이 필요 없기 때문) / 수정 후에는 ProxyFactory가 final class이고 static method이기에 JVM이 확신할 수 있어 invokeStatic이 호출된다
 
 ### 권장 설정
 

@@ -18,6 +18,7 @@
     - Netty EventLoop: 비동기 I/O 및 요청 처리를 위해 다수의 Netty Worker와 스레드를 활용함 (기본값: `Runtime.getRuntime().availableProcessors() * 2`)
       - netty event loop의 전용 스레드를 통해 network i/o 결과를 받아오며, 일반 스레드는 내부 라이브러리의 작업(watch dog 등)과 콜백 작업에 사용한다
         - webflux의 `Scheduler.boundedElastic()`처럼 event loop의 흐름을 깨는 cpu 작업을 위해 사용한다
+    - lettuce로 구현하는 분산 락은 setnx를 이용한 spin형태의 구현이 일반적이지만, redisson은 내부적으로 세마포어를 이용하여 Thread를 TIMED_WAITING(TTL만큼) 상태로 전환시킨다
 
 ---
 
@@ -31,3 +32,13 @@
   - 검증에 필요한 시간낭비를 생략 할 수 있음
   - `바퀴를 다시 발명`하지 않고 비즈니스 로직에만 집중할 수 있음
 - Redisson이 더 많은 커넥션 풀과 스레드를 관리해야 해서 가벼운 Lettuce에 비해 인프라 리소스를 더 쓰지만, 안정성을 위해 이 비용을 감수
+
+## Redisson의 분산락 경합 최소화
+
+1. 서버당 1개의 대표 스레드(Netty EventLoop)만 Redis 채널을 구독
+  - 유일하게 Redis lock channel을 구독하고 lock을 부여할수 있는 worker
+2. 나머지 99개의 로컬 스레드는 Redis에 직접 요청을 보내지 않고, 자바의 로컬 Semaphore에 대기한다
+  - AQS에서 대기하며, not-fair모드를 기본 설정으로 사용한다/어쩌피 네트워크 I/O에 따라 공정할 수 없다는 판단을 한 것으로 보인다
+  - 대기의 경우 락을 요청하고, TTL값을 리턴받아 그 시간만큼 대기(TIMED_WAITING(futuex))한다
+3. Redis로부터 "락이 해제되었다"는 Pub/Sub 메시지가 단 1개 오면, Netty Worker는 세마포어를 1개 풀어준다(`semaphor.release()`)
+4. 요청을 보내도 다른 노드에 뺏기면 다시 대기(TIMED_WAITING(futex))한다

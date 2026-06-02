@@ -144,10 +144,20 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 ### N-gram
 
-> LLM 바닥부터 만들기1: https://www.honglab.ai/courses/llmpt1
+> LLM 바닥부터 만들기1: 통계적 언어 모델의 원리<br>
+> https://www.honglab.ai/courses/llmpt1
 
 - [LLM의 발전과정](CS/LLM/History.md)
 - [N-gram 언어 모델](CS/LLM/Ngram.md)
+
+--- 
+
+### 뉴럴 언어 모델
+
+> LLM 바닥부터 만들기2: 뉴럴 언어 모델의 이해<br> 
+> https://www.honglab.ai/courses/llmpt2
+
+- [N-gram의 한계와 차원의 저주](CS/Neural/Curse.md)
 
 ---
 

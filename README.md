@@ -291,6 +291,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
   - [async 시스템 콜의 한계](CS/SystemCall/AsyncLimit.md)
   - [io_uring](CS/SystemCall/IOuring.md)
   - [epoll과 webflux](CS/SystemCall/Webflux.md)
+  - [select]
 - [mmap]
 
 ---

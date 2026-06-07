@@ -4,7 +4,9 @@
 - webflux는 이렇게 만들어진 epoll system call을 최대한 잘 이용하기 위해 reactor 패턴을 핵심 패턴으로 채택했다
   - os(linux)에서 더 효율적인 system call이 추가되어도(io_uring) 안정성이 최우선이라 epoll을 사용한다
     - netty-incubator-transport-io_uring를 통해 사용 할 수 있다
-  - window에서의 webflux는 IOCP를 사용하지 못하는데, 이 것은 java의 nio Selector가 window에서 select로 구현이 되어있기 떄문이다(linux의 경우 epoll)
+  - Windows 환경 내 WebFlux의 IOCP 활용 불가 원인은 Java NIO Selector의 select system call로 구현되어 있기 때문이다
+    - Linux의 epoll에 대응하는 고성능 멀티플렉싱 시스템 콜의 부재
+      - linux의 경우 nio가 epoll로 구현되어 있다
     - select system call은 fd가 많아질 경우 한계가 있다
     - select system call
       - fd를 전부 감시해주는 epoll의 이전 세대의 system call로써, 모든 fd를 직접 폴링으로 감시해서 많은 오버헤드가 있다
@@ -14,7 +16,9 @@
   - webflux(netty) boss thread가 epoll을 client의 요청을 accept해서 socket connection(fd)을 만든다
   - socket connection(fd)의 완료 통지를 worker thread pool의 특정 thread와 매핑하여 특정 worker가 event를 통지받을 수 있도록 한다
   - socket connection(fd)는 재사용되며(http protocol의 keep-alive 설정 사용시), connection의 판별은 os network stack의 tcp connection을 통해 진행된다
-- 예제 자바코드
+
+## Netty 예제 자바코드
+
 ```java
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -167,4 +171,15 @@ public class MiniNettyServer {
 ```
 
 - gemini로 생성한 netty 예제코드
-- 결국 eventloop의 실체는 fd(socket connection)를 감시하는 `while (!Thread.currentThread().isInterrupted())`이다
+- 결국 eventloop의 실체는 fd(socket connection)를 감시하는 `while (!Thread.currentThread().isInterrupted())`루프이다
+  - `selector.select(); // epoll_wait: 새로운 클라이언트가 올 때까지 블로킹` 을 통해 blocking으로 cpu의 spin을 막고 이벤트를 감시하는 것이 핵심이다
+  - Boss EventLoop: `bossSelector.select()/key.isAcceptable()`로 새로운 클라이언트 연결(Accept)을 대기
+    - boss eventloop(main)은 socket의 connection까지만 관리하며, connection이 맺어진 socket의 참조를 worker eventloop로 넘겨 감시시킨다
+  - Worker EventLoop: `workerSelector.select()/key.isReadabke()`로 소켓의 데이터 입출력(Read/Write)을 대기
+
+### 바로 worker.register()를 하지 못하고, wakeup()을 통해 깨워야 하는 이유
+
+- worker는 select()를 통해 자신의 자원(keys: 등록된 socket, selectedKeys: event가 발생한 socket)에 락을 건다
+- boss.register()를 바로 할 경우 worker의 자원을 획득 하려고 lock을 시도하기 때문에 lock 경합으로 인한 blocking이 발생한다
+  - 이 경우 boss는 자바 모니터 락을 획득하기 위해 BLOCKED상태로 멈추고, worker는 select() system call을 호출하여 kernel의 I/O 통지를 기다리며 sleep 상태가 되어있다
+- 그래서 자원 획득의 경합을 막기위해 `ConcurrentLinkedQueue<SocketChannel>`를 통해 accept된 socket의 참조를 넣은 후 wakeup()을 통해 깨워 worker가 직접 추가시키도록 해야한다

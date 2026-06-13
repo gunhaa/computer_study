@@ -143,8 +143,8 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 > https://www.yes24.com/product/goods/125299750
 
-- [프로그래밍 언어부터 프로그램 실행까지, 이렇게 진행된다](CS/UnderlyingComputer/LanguageToExecute.md)
-
+- [Chapter1. 프로그래밍 언어부터 프로그램 실행까지, 이렇게 진행된다](CS/UnderlyingComputer/LanguageToExecute.md)
+- [Chapter2. 프로그램이 실행되었지만, 뭐 뭔 하도 모르겠다](CS/UnderlyingComputer/ProgramExecute.md)
 ---
 
 ## AI

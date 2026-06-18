@@ -14,7 +14,8 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [개발 상식](#개발-상식)
   - [WebRTC](#webrtc)
   - [GITHUB](#github)
-  - [컴퓨터 과학 관련 책](#컴퓨터-밑바닥의-비밀)
+  - [컴퓨터 밑바닥의 비밀](#컴퓨터-밑바닥의-비밀)
+  - [Dev Leaders & Insights](#Dev-Leaders--Insights)
 - [AI](#ai)
   - [LLM](#n-gram)
 - [아키텍쳐](#아키텍쳐)
@@ -149,9 +150,13 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [Chapter2. 프로그램이 실행되었지만, 뭐 뭔 하도 모르겠다](CS/UnderlyingComputer/ProgramExecute.md)
 ---
 
-## AI
+### Dev Leaders & Insights
+
+- [Keynote: Linus Torvalds, Creator of Linux & Git with Dirk Hohndel, Founder, DH Consulting](CS/DevLeaders/Linus1.md)
 
 ---
+
+## AI
 
 ### N-gram
 

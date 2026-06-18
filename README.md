@@ -947,7 +947,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 ## Retrospective
 
-- [260617](CS/Retrospective/260617.md)
+- [260617 회식](CS/Retrospective/260617.md)
 
 ---
 

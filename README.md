@@ -933,7 +933,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 ## Kubernetes
 
-- [Kubernetes 3/6 세미나 1](CS/Kubernetes/Kubernetes1.md)
+- [Kubernetes 25/03/06 세미나 1](CS/Kubernetes/Kubernetes1.md)
 
 ---
 
@@ -1024,6 +1024,9 @@ Markdown으로 학습 내용을 정리하고 있습니다.
   - [자바로 구현하고 배우는 자료구조](https://www.boostcourse.org/cs204/joinLectures/145114)
   - [모두를 위한 컴퓨터 과학 (CS50 2019)](https://www.boostcourse.org/cs112/joinLectures/41307)
   - [모두를 위한 파이썬 (PY4E)](https://www.boostcourse.org/cs122/joinLectures/74778)
+- 홍정모
+  - [파트1. 통계적 언어 모델의 원리](https://www.honglab.ai/courses/llmpt1)
+  - [파트2. 뉴럴 언어 모델의 이해](https://www.honglab.ai/courses/llmpt2)
 - 기타
   - [고려대학교 원격교육센터/ 최린 - 운영체제](https://www.youtube.com/playlist?list=PLL3t9Nt4HrfvGwOgy6UhLtS9iVKhlk4pk)
   - [어라운드 허브 스튜디오 - Webflux](https://www.youtube.com/playlist?list=PLlTylS8uB2fAv5USxQp5tTom1ibnHOdrv)
@@ -1031,6 +1034,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
   - [크래프트맨 맨탈리티 - 네트워크 기초 무료 강의](youtube.com/watch?v=dsoAkoxZ13o&pp=ygUM64Sk7Yq47JuM7YGs)
   - [김남규 교수 - 10_데이터베이스실무](https://www.youtube.com/playlist?list=PLg_wJlcMiuKtGdlIaAZ0rOPPQuTDENnEQ)
   - [포항공대 차세대 통신 및 네트워크 강의모음 - (학부 24-1) 통신 및 네트워크 개론](https://www.youtube.com/playlist?list=PL2fxOURY4wI4U438r2j1u0M6L5bxJ67Pi)
+  - [MIT 6.824 Distributed Systems (Spring 2020)](https://www.youtube.com/playlist?list=PLrw6a1wE39_tb2fErI4-WkMbsvGQk9_UB)
 
 
 ---

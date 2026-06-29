@@ -135,6 +135,46 @@ public final PreparedStatement prepareStatement(String sql, String[] columnNames
   - 즉, 여러 구현체가 있는 팩토리 메서드(MySQL, Oracle의 delegate) 대신 final 클래스의 static메서드를 이용한 직접 호출로 최적화 한 것이다(한개의 구현체) 
   - 즉, 동적 프록시 클래스(팩토리)의 내부 메서드는 벤더의 메서드를 바이트코드로 채워넣는다(버전이 바뀌며 구현이 바뀌어도 코드 변경이 필요 없기 때문) / 수정 후에는 ProxyFactory가 final class이고 static method이기에 JVM이 확신할 수 있어 invokeStatic이 호출된다
 
+### CPU의 캐시 라인 무효화 제어
+
+- OS 스케줄러가 스레드에 할당한 CPU 실행 시간(Time Slice / Execution Quanta) 내에 HikariCP의 동작이 모두 처리되지 않는다면 이후 작업에 필요한 정보가 L1,L2 캐시에 남아있지 않을 가능성이 높아진다
+  - 이를 해결하기 위해 바이트코드를 최대한 압축해 OS Scheduler의 타임 슬라이스(Execution Quanta)내에서 실행되도록 최적화 했다
+  - JIT 컴파일러의 메서드 인라인화 조건(바이트 코드 35바이트 이하)으로 압축해 JIT의 인라인화를 유도했다
+  1. 메서드 내부에서 try-catch 블록마저 별도의 헬퍼 메서드로 쪼개서 밖으로 던졌다
+  2. 문자열 더하기 연산이나 로깅 로그를 핵심 로직에서 완전히 배제헀다
+  ```java
+   // 최적화에 불리한 방식 (단일 메서드 내부 로깅)
+   public Connection getConnection() {
+      Connection conn = pool.take(); // 1. 핵심 로직
+      
+      // 2. 내부 로깅 
+      // logger.debug(...) 문장은 단순해 보이지만, 내부적으로 문자열을 결합하고, logger의 메서드를 호출하는 수십 바이트짜리 거대한 바이트코드로 변환
+      if (logger.isDebugEnabled()) {
+         logger.debug("Successfully fetched connection: " + conn);
+      }
+      
+      return conn;
+   }
+
+  //  최적화에 유리한 방식 (외부 메서드로 로깅 분리)
+   public Connection getConnection() {
+      Connection conn = pool.take(); // 1. 핵심 로직
+      
+      if (logger.isDebugEnabled()) {
+         logFetchSuccess(conn);     // 2. 로깅은 외부로
+      }
+      
+      return conn;
+   }
+
+   // 로깅만 담당하는 독립된 메서드 (Cold Path)
+   private static void logFetchSuccess(Connection conn) {
+      logger.debug("Successfully fetched connection: " + conn);
+   }
+  ```
+  3. if 조건문의 중첩을 최소화하여 분기 명령이 차지하는 바이트를 아꼇다
+- 결론: Java 라이브러리에서 디버깅을 하면서 추적해보면 `이렇게까지 나눠져 있어야하나? 라는 생각이 들 만큼` 끝 없이 깊이 들어가는데, 이 것은 단일 책임 원칙과 JIT 인라인화를 두 가지 모두 취하기 위한 최적화 방법이다
+
 ### 권장 설정
 
 > https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration

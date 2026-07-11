@@ -158,7 +158,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 - [Keynote: Linus Torvalds, Creator of Linux & Git with Dirk Hohndel, Founder, DH Consulting](CS/DevLeaders/Linus1.md)
 - [The Mind Behind Linux | Linus Torvalds | TED](CS/DevLeaders/Linus2.md)
-- [](CS/DevLeaders/Linus3.md)
+- [Linus Torvalds in conversation with Dirk Hohndel at OSS Japan 2023](CS/DevLeaders/Linus3.md)
 
 ---
 

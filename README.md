@@ -983,6 +983,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 - [N100 Ubuntu 설치 SOP](CS/LocalCluster/ubuntu.md)
 - [ipTIME AX6000M 설치 SOP](CS/LocalCluster/AX6000M.md)
+- [N100 Script SOP](CS/LocalCluster/Scripts.md)
 
 ---
 

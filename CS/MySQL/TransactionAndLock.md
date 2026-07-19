@@ -95,112 +95,103 @@ mysql> SELECT RELEASE_LOCK('mylock');
   - 정확히 말하면, 레코드 수준의 락(Row-level Lock)을 걸고 나서 해당 작업을 수행한다.
 - InnoDB 스토리지 엔진은 레코드 자체가 아니라 인덱스의 레코드를 잠근다
   - 레코드 자체를 잠그느냐, 아니면 인덱스를 잠그느냐는 것은 상당히 크고 중요한 차이를 만들어 낸다
-- InnoDB는 레코드 자체에 락을 거는 것이 아니라, 해당 레코드를 포함하는 인덱스의 entry(리프 노드)에 락을 건다.
-- 이는 InnoDB가 모든 데이터를 인덱스를 통해 접근하기 때문이다.
+- InnoDB는 레코드 자체에 락을 거는 것이 아니라, 해당 레코드를 포함하는 인덱스의 엔트리에 락을 건다
+  ```sql
+  UPDATE employees SET salary = 6000 
+  WHERE last_name = '황' AND first_name = '건하';
+  ```
+  - last_name 컬럼에만 세컨더리 인덱스가 걸려있을 경우, 해당 쿼리가 실행되면 세컨더리 인덱스를 통해 '황'으로 접근 후 '건하'를 찾는다
+  - 이 트랜잭션의 실행 중일떄는 last_name이 '황'인 모든 인덱스 엔트리에 잠금이 걸린다
+  - 세컨더리 인덱스의 엔트리(인덱스의 레코드)는 [인덱스 컬럼 정보 + PK 값]으로 구성되어 있다
+  - InnoDB에서 '인덱스 레코드 락'이란, 조건에 처음에 걸린 세컨더리 인덱스 엔트리 자체를 먼저 잠그고, 이어서 그 안의 PK 값을 통해 클러스터 인덱스로 찾아가 최종 데이터 레코드까지 연속해서 잠그는 것을 의미한다
+- 이는 InnoDB가 모든 데이터를 인덱스를 통해 접근하기 때문이다
   - 인덱스 → 해당 row 접근 → 정확한 인덱스 레코드에만 락
   - 인덱스가 없을 경우 → 테이블 풀 스캔 → 모든 row 잠금 가능성
 - InnoDB에서 락의 단위는 레코드 자체가 아니라 인덱스의 엔트리
 - 인덱스가 없으면 락 성능이 급격히 저하될 수 있음
 - 따라서 정확한 락 범위를 위해 인덱스 설계가 매우 중요
 
-# FOR UPDATE (DB 락) vs Mutex (애플리케이션 락) 비교
+### REPEATABLE READ격리 수준에서 발생하는 Next Key Lock
 
-- InnoDB는 실제 데이터 변경 시 자동으로 락을 건다(인덱스 레코드에 거는 락)
-  - 하지만 FOR UPDATE는 바꾸기 전에 미리 잠금 걸어서, 다른 트랜잭션의 접근을 선제적으로 차단하는 기능이다
-
-## 개요
-
-| 항목               | DB 락 (`FOR UPDATE`)                         | 애플리케이션 락 (Mutex 등)                   |
-| ------------------ | -------------------------------------------- | -------------------------------------------- |
-| 적용 위치          | DB 내부 (InnoDB 등)                          | 코드 레벨 (JVM, Redis, OS 등)                |
-| 락 범위            | 명확한 튜플(row) 단위                        | 범용적인 임의 리소스 단위                    |
-| 원자성 보장        | 트랜잭션으로 ACID 보장                       | 직접 처리 필요 (락 획득 후 예외, 실패 고려)  |
-| 락 해제            | `COMMIT`, `ROLLBACK`, 세션 종료 시 자동 해제 | 명시적 해제 필요, 누락 시 데드락 위험        |
-| 복구 안정성        | 세션 종료 시 자동 정리                       | 장애 시 수동 복구 필요                       |
-| 사용 복잡도        | 낮음 (SQL로 처리)                            | 높음 (락 객체 생성, 예외 처리, 로깅 등 필요) |
-| 성능               | 로컬 DB 수준, 고성능                         | 네트워크 락일 경우 지연 발생 가능            |
-| 데드락 발생 가능성 | 있음 (락 순서 주의 필요)                     | 있음 (복잡한 논리일수록 증가)                |
-| 락 지속 시간 제어  | 트랜잭션 단위로 관리                         | 수동 제어 필요 (타임아웃, 스케줄러 등)       |
-| 대표 예            | `SELECT ... FOR UPDATE`                      | `synchronized`, `ReentrantLock`, Redis SETNX |
-
----
-
-## FOR UPDATE 사용 예제
-
-```sql
-START TRANSACTION;
-
--- 여러 row를 선점적으로 락
-SELECT * FROM accounts WHERE id IN (1, 2) FOR UPDATE;
-
--- 로직 수행
-UPDATE accounts SET balance = balance - 100 WHERE id = 1;
-UPDATE accounts SET balance = balance + 100 WHERE id = 2;
-
-COMMIT;
-```
-
-- InnoDB의 row-level exclusive lock 사용
-- 다른 트랜잭션은 동일 row에 접근 시 블로킹됨
-- 트랜잭션 종료 시 자동 해제됨
-
-## 버저닝을 이용한 낙관적 락
-
-낙관적 락은 동시성 충돌이 드물다고 가정하고, 데이터에 대한 잠금 없이 작업을 먼저 진행한 뒤, 최종 저장 시점에 버전(version) 등을 비교하여 충돌 여부를 확인하는 전략이다.
-
-- 데이터 읽기 시 잠금 없음
-- 변경 시점에 충돌 감지
-- 일반적으로 `version` 필드를 사용해 충돌 여부 판단
-
-### 어플리케이션 수준의 구현
-
-> 낙관적 락은 DB에서 제공하는 물리적 락이 아닌, 어플리케이션에서 직접 충돌 검증을 구현한다.
-
+- Next key lock은 record lock과 gap lock이 합쳐진 형태이다
+- InnoDB의 REPEATABLE READ 격리 수준은 phantom read를 발생시키지 않기 위해 특정 조건에서 record lock만이 아닌 gap lock을 추가적으로 발생시킨다
 ```java
-@Entity
-public class Product {
+    // Next Key Lock 예제 테스트
+    // innodb_lock_wait_timeout = 3
+    @Test
+    @DisplayName("Next Key Lock: 비관적 배타락으로 범위 조회 시 해당 범위에 INSERT 자체가 차단되어 팬텀 리드를 원천 봉쇄한다(Point Search는 최적화에 따라 Gap락이 걸리지 않을 수 있다)")
+    void nextKeyLockTest() throws InterruptedException {
+        // given
+        final ExecutorService es = Executors.newFixedThreadPool(2);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch endLatch = new CountDownLatch(1);
+        final CountDownLatch insertLatch = new CountDownLatch(1);
+        final CountDownLatch errorLatch = new CountDownLatch(1);
 
-    @Id
-    private Long id;
+        final long startId = accountDbService.join();
+        final int joinIterationInit = 0;
+        final int joinIterationEnd = 5;
+        final long greaterThanId = (startId + joinIterationEnd) / 2;
 
-    private String name;
+        final LongAdder exceptionCounter = new LongAdder();
+        for (int i = joinIterationInit; i < joinIterationEnd; i++) {
+            accountDbService.join();
+        }
 
-    @Version
-    private Long version;
-}
+        // when
+        es.submit(() -> {
+            transactionTemplate.executeWithoutResult(status -> {
+                try {
+                    startLatch.await(DEFAULT_LATCH_TIMEOUT, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    exceptionCounter.increment();
+                }
+                // Next Key Lock Acquire
+                // for update는 insert/update시와 같은 비관적 배타락을 획득한다
+                // 범위에 거는 락은 사이와 이후의 무한대의 공간에 갭 락(비관적 배타락)을 건다(팬텀 리드 방지)
+                // 갭락은 Range Scan시 해당되는 곳에 걸리며, 마지막 레코드 이후가 조건에 있다면 INSERT가 차단된다
+                // 이로 인해 해당 범위 내에 새로운 레코드의 Insert가 원천 차단된다
+                accountDbRepository.findAllByIdGreaterThanWithLock(greaterThanId);
+                insertLatch.countDown();
+                try {
+                    errorLatch.await(DEFAULT_LATCH_TIMEOUT, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    exceptionCounter.increment();
+                }
+                endLatch.countDown();
+            });
+        });
+
+        es.submit(() -> {
+            transactionTemplate.executeWithoutResult(status -> {
+                try {
+                    insertLatch.await(DEFAULT_LATCH_TIMEOUT, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    exceptionCounter.increment();
+                }
+                try {
+                    // 위 스레드가 greaterThanId 이후 구간에 Next-Key Lock을 선점하고 있다
+                    // 신규 INSERT는 해당 구간의 Gap Lock막혀 블로킹 된다
+                    accountDbService.join();
+                } catch (CannotAcquireLockException e) {
+                    Thread.currentThread().interrupt();
+                    exceptionCounter.increment();
+                    errorLatch.countDown();
+                }
+            });
+        });
+
+        // then
+        startLatch.countDown();
+        boolean isEnd = endLatch.await(DEFAULT_LATCH_TIMEOUT, TimeUnit.SECONDS);
+
+        assertThat(isEnd).isTrue();
+        assertThat(exceptionCounter.sum()).isEqualTo(1);
+
+        es.shutdownNow();
+        es.close();
+    }
 ```
-
-- JPA에서는 ORM에서는 @Version 어노테이션을 통해 자동으로 낙관적 락을 적용할 수 있다.
-- 트랜잭션 커밋 시점에 DB에 저장된 버전과 현재 엔티티의 버전을 비교해 다르면 OptimisticLockException 예외가 발생한다.
-
-### 보상 트랜잭션 (Compensating Transaction)
-
-> 보상 트랜잭션은 실제 트랜잭션을 롤백할 수 없는 상황에서, 이미 실행된 작업을 되돌리는 별도의 로직을 정의하여 적용하는 방식이다.
-
-- 분산 트랜잭션 대안으로 사용됨
-- SAGA 패턴에서 주로 등장
-- 실패 시 이전 상태로 되돌리는 작업 필요
-
-#### 예시
-
-- 재고 감소 요청 → 성공
-- 결제 요청 → 실패
-- 보상 트랜잭션: 재고 감소를 되돌리는 로직 실행
-
-```plaintext
-복사
-편집
-[재고 감소] → [결제 실패] → [재고 증가 보상 트랜잭션 실행]
-```
-
-### 낙관적 락과 보상트랜잭션이 필요한 이유
-
-- 낙관적 락: 여러 사용자 또는 시스템이 동일한 리소스를 업데이트할 가능성이 있는 환경에서, 데이터 정합성을 보장하면서도 성능 저하 없이 동시성을 제어할 수 있다.
-- 보상 트랜잭션: 네트워크 또는 시스템 간 트랜잭션 일관성 보장이 어려운 환경(SAGA 등)에서 유연한 복구 수단을 제공한다.
-
-## Recap
-
-- DB 내부에서 레코드에 대한 정합성과 동시성 제어가 필요할 경우 FOR UPDATE가 가장 안전하고 간단한 선택
-- 여러 인스턴스 간 공유 리소스나, DB 외 리소스를 보호해야 할 경우 애플리케이션 락 사용
-- 트랜잭션 기반 처리라면 DB 락이 정석이며, 로직이 DB 외부로 퍼져 있을 경우 애플리케이션 락 고려
-- 가능한 한 "데이터는 DB에서, 동시성도 DB에 맡기는 전략"이 유지보수와 안정성 면에서 유리함

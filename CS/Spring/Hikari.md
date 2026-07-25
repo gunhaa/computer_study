@@ -139,7 +139,7 @@ public final PreparedStatement prepareStatement(String sql, String[] columnNames
 
 - OS Scheduler가 thread에 할당한 CPU 실행 시간(Time Slice / Execution Quanta) 내에 HikariCP의 동작이 모두 처리되지 않는다면 이후 작업에 필요한 정보가 L1,L2 캐시에 남아있지 않을 가능성이 높아진다
   - 이를 해결하기 위해 바이트코드를 최대한 압축해 OS Scheduler의 타임 슬라이스(Execution Quanta)내에서 실행되도록 최적화 했다
-  - 이를 위해 JIT 컴파일러의 메서드 인라인화 조건(바이트 코드 35바이트 이하)으로 압축해 JIT의 인라인화를 유도했다
+  - 이를 위해 JIT 컴파일러의 메서드 인라인화 조건(바이트 코드 35바이트 이하)으로 압축해 JIT의 인라인화를 유도했으며, 이를 이용해 Hot/Cold path를 명확히 분리하였다
   1. 메서드 내부에서 try-catch 블록마저 별도의 헬퍼 메서드로 쪼개서 밖으로 던졌다
   2. 문자열 더하기 연산이나 로깅 로그를 핵심 로직에서 완전히 배제헀다
   ```java
@@ -148,7 +148,7 @@ public final PreparedStatement prepareStatement(String sql, String[] columnNames
       Connection conn = pool.take(); // 1. 핵심 로직
       
       // 2. 내부 로깅 
-      // logger.debug(...) 문장은 단순해 보이지만, 내부적으로 문자열을 결합하고, logger의 메서드를 호출하는 수십 바이트짜리 거대한 바이트코드로 변환
+      // logger.debug(...) 문장은 단순해 보이지만, 내부적으로 문자열을 결합하고, logger의 메서드를 호출하는 수십 바이트짜리 거대한 바이트코드로 변환된다
       if (logger.isDebugEnabled()) {
          logger.debug("Successfully fetched connection: " + conn);
       }
@@ -156,12 +156,21 @@ public final PreparedStatement prepareStatement(String sql, String[] columnNames
       return conn;
    }
 
-  //  최적화에 유리한 방식 (외부 메서드로 로깅 분리)
+   // 최적화에 유리한 방식 (외부 메서드로 로깅 분리)
+   // 해당 방식으로 변환될 경우
    public Connection getConnection() {
       Connection conn = pool.take(); // 1. 핵심 로직
       
       if (logger.isDebugEnabled()) {
          logFetchSuccess(conn);     // 2. 로깅은 외부로
+         // [JIT 최적화 원리]
+
+         // 1. 기존 log.debug(...)의 동작은 StringBuilder ... conn.toString()... 이 실행되며 크기가 커지며, 이 바이트코드 크기에 의해 getConnection()의 인라인화가 불가능해진다
+         // 하지만 logFetchSuccess(conn)형태로 사용한다면, invokeStatic 호출이기에 약 5바이트로 가능해진다(invokeStatic 측도 최적화 가능한 바이트코드 길이라면 inlining Chain이 가능해진다)
+
+         // 2. JIT이 메서드를 인라인화시켜 jmp를 없앨 경우, 외부의 변수들을 상수화시켜 분기 예측을 해(debug 같은 환경 체크)
+         // 3. 인라이닝이 완료되면 JIT은 isDebugEnabled() 조건을 분석하여, 로그가 꺼진 운영 환경(INFO)에서는 분기 전체(Cold Path)를 기계어 변환 대상에서 제거한다
+         
       }
       
       return conn;
@@ -172,7 +181,7 @@ public final PreparedStatement prepareStatement(String sql, String[] columnNames
       logger.debug("Successfully fetched connection: " + conn);
    }
   ```
-  3. if 조건문의 중첩을 최소화하여 분기 명령이 차지하는 바이트를 아꼇다
+  3. if 조건문의 중첩을 최소화하여 분기 명령이 차지하는 바이트를 아꼈다
 - 결론: Java 라이브러리에서 디버깅을 하면서 추적해보면 `이렇게까지 나눠져 있어야하나? 라는 생각이 들 만큼` 끝 없이 깊이 들어가는데, 이 것은 단일 책임 원칙과 JIT 인라인화를 두 가지 모두 취하기 위한 최적화 방법이다
 
 ### 권장 설정

@@ -45,6 +45,7 @@ Kong API
 - 운영팀이 API를 통해 현재 정합성 상태를 직접 확인
 - 이후 ADMIN이나 Batch 등에서 활용할 수 있는 기반 제공
 - 도메인이 추가되더라도 동일한 방식으로 비교할 수 있는 구조 구성
+- **Portal과 Kong의 데이터 모델 차이와 도메인 간 매핑 관계를 문서화하여, 제3자도 각 데이터의 대응 관계와 비교 기준을 명확하게 이해할 수 있도록 함**
 
 ---
 
@@ -60,12 +61,18 @@ Portal과 Kong은 동일한 데이터를 관리하지만, 데이터 모델과 �
 Portal Domain
      │
      ▼
-XXCompareDto
+ComparisonService(정규화)
+     │
+     ▼
+XXCompareDto.fromPortal()
 
 Kong Domain
      │
      ▼
-XXCompareDto
+ComparisonService(정규화)
+     │
+     ▼
+XXCompareDto.fromKong()
 ```
 
 `CompareDto`는 단순한 API Response DTO가 아니라, **Portal과 Kong의 서로 다른 데이터 모델을 비교하기 위한 중간 모델** 역할을 담당했습니다.
@@ -113,14 +120,17 @@ AclCompareDto
 
 ---
 
-# 5. DiffResult.of()
+# 5. ComparisonResult.of(portal, kong)
 
-Portal과 Kong의 데이터가 각각 `Diffable`을 구현한 `CompareDto`로 변환되면, `DiffResult.of(portal, kong)`를 통해 두 대상을 비교합니다.
+Portal과 Kong의 데이터가 각각 `Diffable`을 구현한 `CompareDto`로 변환되면, `ComparisonResult.of(portal, kong)`를 통해 두 대상을 비교합니다.
 
 전체적인 흐름은 다음과 같습니다.
 
 ```text
 Portal 원본 데이터
+       │
+       ▼
+ComparisonService(정규화)
        │
        ▼
 Portal CompareDto
@@ -130,7 +140,7 @@ Portal CompareDto
        ├──────────────┐
        │              │
        │              ▼
-       │       DiffResult.of()
+       │       ComparisonResult.of()
        │              ▲
        │              │
        │              │
@@ -140,44 +150,25 @@ Portal CompareDto
 Kong CompareDto ◄─────┘
        ▲
        │
+ComparisonService(정규화)
+       ▲
+       │
 Kong 원본 데이터
 ```
-
-즉, Portal과 Kong의 원본 Entity를 직접 비교하는 것이 아니라,
-
-```text
-Portal 원본
-    ↓
-Portal CompareDto
-
-Kong 원본
-    ↓
-Kong CompareDto
-
-    ↓
-
-DiffResult.of(portal, kong)
-
-    ↓
-
-비교 결과
-```
-
-의 구조를 사용했습니다.
 
 이를 통해 Portal과 Kong의 원본 데이터 모델 차이를 `CompareDto` 단계에서 흡수하고, 실제 비교 로직에서는 동일한 비교 추상화를 사용할 수 있도록 했습니다.
 
 ---
 
-# 6. DiffResult Container
+# 6. ComparisonResult Container
 
-비교 결과는 `DiffResult`를 통해 관리했습니다.
+비교 결과는 `ComparisonResult`를 통해 관리했습니다.
 
 최종 결과에는 다음과 같은 정보가 포함됩니다.
 
 ```text
-DiffResult Container
-├── API Gateway Data
+ComparisonResult Container
+├── API Gateway Info
 ├── Portal Data extends Diffable
 ├── Kong Data extends Diffable
 └── Mismatches
@@ -194,6 +185,14 @@ DiffResult Container
 전체적인 비교 흐름은 다음과 같습니다.
 
 ```text
+         ┌────────────────────────────┐
+         │(Portal || Kong) raw Domain │
+         └────────────┬───────────────┘
+                       │
+          ┌────────────│─────────────┐
+          │ ComparisonService(정규화)  │
+          └────────────┬─────────────┘
+                       │
                 ┌──────────────┐
                 │ XXCompareDto │
                 └──────┬───────┘
@@ -208,13 +207,13 @@ DiffResult Container
                 \           /
                  \         /
                   \       /
-               DiffResult.of()
+               ComparisonResult.of()
                        │
                        ▼
-              DiffResult Container
+              ComparisonResult Container
               ├── APIGW
-              ├── Portal Data
-              ├── Kong Data
+              ├── Portal Data extends Diffable
+              ├── Kong Data extends Diffable
               └── Mismatches
                        │
                        ▼
@@ -229,12 +228,12 @@ DiffResult Container
         ├── Diffable 구현
         │
         ▼
-Diffable Container에 적용
+ComparisonResult Container에 적용
 ```
 
 하는 방식으로 확장할 수 있도록 구성했습니다.
 
-따라서 도메인별 비교 규칙은 각 `CompareDto`에 응집시키고, 공통적인 비교 흐름은 `Diffable`과 `DiffResult`를 통해 처리하도록 역할을 분리했습니다.
+따라서 도메인별 비교 규칙은 각 `CompareDto`에 응집시키고, 공통적인 비교 흐름은 `Diffable`과 `ComparisonResult`를 통해 처리하도록 역할을 분리했습니다.
 
 ---
 
@@ -266,7 +265,7 @@ Reconcile
 
 당시에는 이러한 기능이 아직 요구사항으로 확정되지 않았기 때문에 현재 구현에서는 **두 시스템의 현재 상태를 비교하는 Diff 기능에 책임을 한정**했습니다.
 
-향후 새로운 책임이 추가될 경우 기존 `Diffable` 인터페이스에 모든 기능을 추가하기보다, ISP에 따라 새로운 역할의 인터페이스와 별도의 Container를 추가하는 방향을 고려하거나, 같은 컨테이너의 생성 메서드에서 템플릿 메서드 형식으로 기능을 호출하는 형식으로 구현할 수 있습니다
+향후 새로운 책임이 추가될 경우 기존 `Diffable` 인터페이스에 모든 기능을 추가하기보다, ISP에 따라 새로운 역할의 상위 인터페이스를 이용해 같은 컨테이너의 생성 메서드에서 템플릿 메서드 형식으로 기능을 호출하는 형식으로 구현할 수 있습니다
 
 ```text
 e.g.

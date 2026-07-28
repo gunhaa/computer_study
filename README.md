@@ -879,7 +879,8 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [Kong Gateway](CS/Kong/Gateway.md)
 - [AdminAPI](CS/Kong/AdminAPI.md)
 - [Comsumer](CS/Kong/Consumer.md)
-- [Route/Service](Cs/Kong/Route.md)
+- [Route/Service](CS/Kong/Route.md)
+- [Acls, Acl](CS/Kong/Acls.md)
 - [Kong Docker Setting](CS/Kong/Setting.md)
 
 ---

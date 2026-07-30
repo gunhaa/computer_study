@@ -48,7 +48,9 @@ CREATE TABLE test_table (fd1 INT, fd2 INT) ENGINE=INNODB;
   - 롤백 가능한 자료들은 링크드 리스트의 형태로 있어 더 이전의 결과가 필요할 경우 이전 포인터로 계속해서 접근한다
 - read_view의 디테일
   - `m_creator_trx_id`, `m_ids`, `m_up_limit_id`, `m_low_limit_id` 4개의 필드로 구성되어있다
+  - read view는 transaction이 시작할때 생성되는게 아니고, 트랜잭션을 시작한 후 첫 `select`시 생성되기에 `m_low_limit_id`가 존재하는 것이다
   - `m_creator_trx_id`를 통해 내가 레코드를 변경했을 경우 내가 볼 수 있는 것인지를 판단한다
+    - 예를 들어 트랜잭션을 시작한 후 `update`를 한다면 현재 트랜잭션 id로 바뀌어, 내가 바꾼 정보에 대한 가시성을 얻을 수 없기 때문이다(MVCC에서 WRITE의 동작시, COMMIT시에 동작하는 것이 아닌 즉시 바뀌고[메모리 변경, Undo log에 write, X-lock을 얻어 추가 쓰기 금지] Transction을 ACTIVE 상태로 관리하며, 이 동작이 WRITE시에도 높은 동시성을 달성할 수 있는 원리이다)
   - `m_ids`를 통해 리드 뷰 생성 당시 활성화 중이던 다른 트랜잭션의 ID를 관리한다
   - `m_up_limit_id`(최소 활성 트랜잭션, m_ids 중 가장 작은 ID)를 통해 이 필드`보다`작은 트랜잭션의 ID는 이미 커밋됬던 안전한 트랜잭션이라는 것을 판단한다
   - `m_low_limit_id`(최대 트랜잭션 ID + 1)을 통해 리드 뷰 생성 당시에 발급된 가장 높은 트랜잭션 ID에 1을 더해 미래의 트랜잭션 인지를 판단한다

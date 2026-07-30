@@ -24,6 +24,8 @@ Kong API
 
 실제 운영 과정에서 Portal과 Kong의 데이터 정합성이 깨지는 문제가 발생했고, 이후 두 시스템의 데이터를 수동으로 비교하고 복구해야 하는 상황이 발생했습니다.
 
+또한, 기능이 수정되며 생기는 버그로 인해 잘못된 데이터가 생성되는 경우도 있었습니다.
+
 이에 따라 **Portal과 Kong의 현재 상태를 비교하여 정합성 여부와 차이점을 확인할 수 있는 API**를 제안하고 구현했습니다.
 
 ---
@@ -64,7 +66,7 @@ Portal Domain
 ComparisonService(정규화)
      │
      ▼
-XXCompareDto.fromPortal()
+XXCompareDto.fromPortal(portalDomain)
 
 Kong Domain
      │
@@ -72,7 +74,7 @@ Kong Domain
 ComparisonService(정규화)
      │
      ▼
-XXCompareDto.fromKong()
+XXCompareDto.fromKong(kongDomain)
 ```
 
 `CompareDto`는 단순한 API Response DTO가 아니라, **Portal과 Kong의 서로 다른 데이터 모델을 비교하기 위한 중간 모델** 역할을 담당했습니다.
@@ -187,7 +189,7 @@ ComparisonResult Container
 ```text
          ┌────────────────────────────┐
          │(Portal || Kong) raw Domain │
-         └────────────┬───────────────┘
+         └─────────────┬──────────────┘
                        │
           ┌────────────│─────────────┐
           │ ComparisonService(정규화)  │

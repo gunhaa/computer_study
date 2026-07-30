@@ -74,7 +74,6 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [Kong Gateway](#kong-gateway)
 - [Swagger](#swagger)
 - [MCP](#mcp)
-- [Hashicorp Vault](#hashicorp-vault)
 - [Jenkins-Docker-AWS](#jenkins-docker-aws)
 - [Docker \& Kubernetes: The Practical Guide - 2025 Edition](#docker--kubernetes-the-practical-guide---2025-edition)
 - [Kubernetes](#kubernetes)
@@ -908,10 +907,6 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 ---
 
-## Hashicorp Vault
-
----
-
 ## Jenkins-Docker-AWS
 
 - [20분만에 전공자처럼 Docker,가상화 이해하기](CS/ETC/NullNull.md)
@@ -987,6 +982,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [N100 Ubuntu 설치 SOP](CS/LocalCluster/ubuntu.md)
 - [ipTIME AX6000M 설치 SOP](CS/LocalCluster/AX6000M.md)
 - [N100 Script SOP](CS/LocalCluster/Scripts.md)
+
 
 ---
 

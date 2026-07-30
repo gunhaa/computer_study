@@ -7,4 +7,4 @@
 
 - Kong gateway의 경우 plugin으로 ACL을 사용할 수 있다
   - key-auth plugin을 사용해 key auth를 이용한 controll을 할 수 있다(ACL과 연관이 없는 별도의 플러그인)
-  - ACL plugin을 사용해 Access List와 Deny List를 작성할수있다
+  - ACL plugin을 사용해 Allow List와 Deny List를 작성할수있다

@@ -176,6 +176,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 - [Toby Live - Claude Code 기본](CS/ClaudeCode/Toby0.md)
 - [Toby Live - 클로드 코드를 이용해 스프링 앱 개발하기 - Live 1](CS/ClaudeCode/Toby1.md)
+- [Toby Live - 클로드 코드를 이용해 스프링 앱 개발하기 - Live 2](CS/ClaudeCode/Toby2.md)
 
 - 
 

@@ -46,6 +46,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
   - [Redis](#redis)
   - [SQLP](#sqlp)
     - [친절한 SQL 튜닝](#친절한-sql-튜닝)
+- [Message Queue](#message-queue)
 - [Deep Dive](#deep-dive)
 - [멀티스레드와 동시성](#멀티스레드와-동시성)
   - [동시성 프로그래밍](#동시성-프로그래밍)
@@ -80,6 +81,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [Kubernetes](#kubernetes)
 - [Front 최적화](#front-최적화)
 - [기술 면접](#기술-면접)
+- [Conference](#Conference)
 - [Retrospective](#Retrospective)
 - [bitlibrary-개발일지](#bitlibrary-개발일지)
 - [Local Cluster](#local-cluster-SOP)
@@ -524,6 +526,12 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 ---
 
+## Message Queue
+
+- [The Log](CS/MessageQueue/TheLog.md)
+
+---
+
 ## Deep dive
 
 > https://www.youtube.com/playlist?list=PL5q3E8eRUieUHnsz0rh0W6AzwdVJBwEK6
@@ -965,6 +973,12 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [기술면접](CS/Interview/TechInterview.md)
   - 분야별 질문&답변
     - [CS](CS/Interview/CS.md)
+
+---
+
+## Conference
+
+- [260916 F5](CS/Conference/F5.md)
 
 ---
 

@@ -530,6 +530,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 - The Log
   - [Part1. What is Log](CS/MessageQueue/WhatIsLog.md)
+  - [Part2. Data Integration](CS/MessageQueue/DataIntegration.md)
 
 ---
 

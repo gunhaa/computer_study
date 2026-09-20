@@ -528,7 +528,8 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 ## Message Queue
 
-- [The Log](CS/MessageQueue/TheLog.md)
+- The Log
+  - [Part1. What is Log](CS/MessageQueue/WhatIsLog.md)
 
 ---
 

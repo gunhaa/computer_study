@@ -205,6 +205,15 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 ---
 
+### LLM from Scratch
+
+> https://product.kyobobook.co.kr/detail/S000214553534
+
+- [쉽게 풀어쓴 AI 용어](CS/ScratchLLM/Glossary.md)
+- [query, key, value](CS/ScratchLLM/QueryKeyValue.md)
+
+---
+
 ## 아키텍쳐
 
 - [클린 아키텍쳐](CS/Architecture/Clean.md)

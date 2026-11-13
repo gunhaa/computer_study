@@ -14,7 +14,28 @@
  public interface Lock {
     // lock을 무한 대기한다
     void lock();
-    // interrupt 발생시 error throw
+    /**
+     * 현재 스레드가 인터럽트된 상태가 아니라면 락을 획득
+     * Acquires the lock unless the current thread is interrupted.
+     *
+     * 락이 비어있으면 즉시 획득
+     * Acquires the lock if it is not held by another thread and returns immediately...
+     *
+     * 다른 스레드가 락을 잡고 있어 대기하는 도중 인터럽트가 발생하면 대기를 중단
+     * If the lock is held by another thread then the current thread lies dormant until:
+     * - The lock is acquired by the current thread; or
+     * - Some other thread interrupts the current thread.
+     *
+     * 락을 얻으려고 대기하는 동안 인터럽트가 발생하면 예외가 발생하고 인터럽트 상태는 초기화
+     * If the current thread is interrupted while acquiring the lock, 
+     * then InterruptedException is thrown and the current thread's interrupted status is cleared.
+     *
+     * 정상적인 락 획득이나 재진입 과정보다 인터럽트에 반응하는 것을 최우선으로 처리
+     * Preference is given to responding to the interrupt over normal or reentrant acquisition of the lock.
+     *
+     * @throws InterruptedException if the current thread is interrupted
+     */
+    // lock을 잡고있는 중의 취소를 하기 위한 것이 아니라, 락을 잡기위해 대기중(AQS)에서 외부에서 취소(interrupt)할 수 있게 열어두는 메서드이다
     void lockInterruptibly() throws InterruptedException;
     // 시도 후 실패시 false
     boolean tryLock();

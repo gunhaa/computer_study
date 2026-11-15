@@ -50,6 +50,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [Deep Dive](#deep-dive)
 - [멀티스레드와 동시성](#멀티스레드와-동시성)
   - [동시성 프로그래밍](#동시성-프로그래밍)
+  - [MIT 6.824: Distributed Systems](#mit-6824-distributed-systems)
 - [Interpreter](#interpreter)
 - [C](#c)
   - [독하게 C를 배운사람을 위한 선형 자료구조](#독하게-c를-배운사람을-위한-선형-자료구조)
@@ -587,6 +588,14 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 - [동시성 프로그래밍이란?](CS/Concurrency/ConcurrencyProgramming.md)
 - [동기처리1](CS/Concurrency/Synchronized1.md)
+
+---
+
+### MIT 6.824: Distributed Systems
+
+> https://www.youtube.com/@6.824
+
+- [MapReduce](CS/DistributedSystems/MapReduce.md)
 
 ---
 

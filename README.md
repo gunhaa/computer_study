@@ -28,7 +28,9 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - 새로운 주제를 공부하는 것을 멈추고, 공부했던 것들을 주기적으로 복습한 상태로 만든다
   - 넓게만 공부하다 보니 지식이 하나로 합쳐지지 못한다
   - 중요한 것은 하나를 알더라도 정확히 아는 것이다
-  - (정리) 핵심 개념은 `history / overview / trade-off / pitfalls / failure-modes / digest`로 나누어 정리한다(https://gunhaa.github.io/knowledge/)
+  - (정리) 핵심 개념은 `history / overview / trade-off / pitfalls / failure-modes / digest`로 나누어 정리한다
+    - 외부 저장소(`history / overview / trade-off / pitfalls / failure-modes`): https://gunhaa.github.io/knowledge/
+    - 현재 저장소(`digest`): [knowledge-digest](#knowledge-digest)
   - (평가) 러버덕 디버깅을 통해 개념을 10초 이내에 두괄식 3줄로 요약하고, digest를 3-5분 동안 설명 가능해야 한다
 
 ## INDEX
@@ -43,6 +45,7 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 - [Claude Code](#claude-code)
 - [AI](#ai)
   - [LLM](#n-gram)
+- [Knowledge-Digest](#knowledge-digest)
 - [아키텍쳐](#아키텍쳐)
   - [대규모 아키텍쳐 설계](#대규모-아키텍쳐-설계)
 - [운영체제](#운영체제)
@@ -235,6 +238,22 @@ Markdown으로 학습 내용을 정리하고 있습니다.
 
 - [쉽게 풀어쓴 AI 용어](CS/ScratchLLM/Glossary.md)
 - [query, key, value](CS/ScratchLLM/QueryKeyValue.md)
+
+---
+
+## Knowledge-Digest
+
+> 원본 문서(`history · overview · tradeoffs · pitfalls · failure-modes`)와 실습(`labs`)은 https://gunhaa.github.io/knowledge/ 를 참조하며, 이곳에는 문서를 정리한 digest만 수집
+
+- [ComputerScience Lock]
+- [Java]
+- [Java Lock]
+- [MySQL]
+- [MySQL Lock]
+- [Redis]
+- [Redis Lock]
+- [Ledger]
+- [Kafka]
 
 ---
 
